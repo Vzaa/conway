@@ -152,11 +152,11 @@ impl Grid {
 }
 
 fn main() {
-    let mut g = Grid::new(50, 15, 15.0);
+    let mut g = Grid::new(100, 50, 15.0);
 
     g.display();
-    for _ in 0..30 {
-        thread::sleep(time::Duration::from_millis(200));
+    loop {
+        thread::sleep(time::Duration::from_millis(100));
         g.step();
         g.display();
     }
