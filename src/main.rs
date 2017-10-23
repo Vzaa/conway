@@ -20,6 +20,18 @@ impl fmt::Display for Cell {
     }
 }
 
+impl Cell {
+    fn next(self, cnt: usize) -> Cell {
+        match (self, cnt) {
+            (Cell::Alive, cnt) if cnt < 2 => Cell::Dead,
+            (Cell::Alive, cnt) if cnt < 4 => Cell::Alive,
+            (Cell::Alive, cnt) if cnt >= 4 => Cell::Dead,
+            (Cell::Dead, cnt) if cnt == 3 => Cell::Alive,
+            _ => self,
+        }
+    }
+}
+
 struct Grid {
     width: usize,
     height: usize,
@@ -130,24 +142,19 @@ impl Grid {
     }
 
     fn step(&mut self) {
-        let counts: Vec<_> = (0..self.buf.len())
-            .map(|idx| {
-                self.get_neigh(idx)
+        self.buf = self.buf
+            .iter()
+            .enumerate()
+            .map(|(idx, c)| {
+                let cnt = self.get_neigh(idx)
                     .iter()
-                    .filter(|&c| *c == Cell::Alive)
-                    .count()
-            })
-            .collect();
+                    .filter(|&cc| *cc == Cell::Alive)
+                    .count();
 
-        for (c, cnt) in self.buf.iter_mut().zip(counts) {
-            *c = match (*c, cnt) {
-                (Cell::Alive, cnt) if cnt < 2 => Cell::Dead,
-                (Cell::Alive, cnt) if cnt < 4 => Cell::Alive,
-                (Cell::Alive, cnt) if cnt >= 4 => Cell::Dead,
-                (Cell::Dead, cnt) if cnt == 3 => Cell::Alive,
-                _ => *c,
-            }
-        }
+                c.next(cnt)
+            })
+            .collect::<Vec<Cell>>()
+            .into_boxed_slice();
     }
 }
 
